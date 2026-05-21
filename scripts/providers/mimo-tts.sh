@@ -94,19 +94,28 @@ main() {
             ]
         }' > "$req_file"
 
-    curl -s --max-time "$REQUEST_TIMEOUT" \
+    # 调用 MiMo API，捕获 HTTP 状态码
+    local http_code
+    http_code=$(curl -s --max-time "$REQUEST_TIMEOUT" \
         -X POST "$API_BASE/chat/completions" \
         -H "Authorization: Bearer $api_key" \
         -H "Content-Type: application/json" \
         -d @"$req_file" \
-        -o "$resp_file"
+        -o "$resp_file" \
+        -w "%{http_code}") || true
 
-    # 检查 API 错误
+    # 检查 HTTP 状态 + API 错误
     local err_msg
     err_msg=$(jq -r '.error.message // empty' "$resp_file" 2>/dev/null)
-    if [[ -n "$err_msg" ]]; then
-        echo "[mimo-tts] API Error: $err_msg" >&2
+
+    if [[ "$http_code" -ge 400 || -n "$err_msg" ]]; then
+        echo "[mimo-tts] ⚠️ API Error (HTTP $http_code): ${err_msg:-unknown}" >&2
         rm -f "$req_file" "$resp_file"
+        # Exit code 2 = auth error → 告诉 tts.sh 降级到 Edge TTS
+        if [[ "$http_code" -eq 401 || "$http_code" -eq 403 ]]; then
+            echo "[mimo-tts]    ↳ API Key invalid/expired — tts.sh will fallback to Edge TTS" >&2
+            exit 2
+        fi
         exit 1
     fi
 

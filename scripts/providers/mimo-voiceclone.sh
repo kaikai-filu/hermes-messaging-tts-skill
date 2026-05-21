@@ -84,19 +84,27 @@ main() {
             ]
         }' > "$req_file"
 
-    curl -s --max-time "$REQUEST_TIMEOUT" \
+    # 调用 VoiceClone API，捕获 HTTP 状态码
+    local http_code
+    http_code=$(curl -s --max-time "$REQUEST_TIMEOUT" \
         -X POST "$API_BASE/chat/completions" \
         -H "Authorization: Bearer $MIMO_API_KEY" \
         -H "Content-Type: application/json" \
         -d @"$req_file" \
-        -o "$resp_file"
+        -o "$resp_file" \
+        -w "%{http_code}") || true
 
-    # 检查错误
-    if jq -e '.error' "$resp_file" &>/dev/null; then
+    # 检查 HTTP 状态 + API 错误
+    if [[ "$http_code" -ge 400 ]] || jq -e '.error' "$resp_file" &>/dev/null; then
         local err_msg
-        err_msg=$(jq -r '.error.message // .error' "$resp_file")
-        echo "[mimo-voiceclone] ERROR: $err_msg" >&2
+        err_msg=$(jq -r '.error.message // .error // empty' "$resp_file" 2>/dev/null)
+        echo "[mimo-voiceclone] ⚠️ API Error (HTTP $http_code): ${err_msg:-unknown}" >&2
         rm -f "$req_file" "$resp_file" "$processed_ref"
+        # Exit code 2 = auth error → 告诉 tts.sh 降级到 Edge TTS
+        if [[ "$http_code" -eq 401 || "$http_code" -eq 403 ]]; then
+            echo "[mimo-voiceclone]    ↳ API Key invalid/expired — tts.sh will fallback to Edge TTS" >&2
+            exit 2
+        fi
         exit 1
     fi
 
