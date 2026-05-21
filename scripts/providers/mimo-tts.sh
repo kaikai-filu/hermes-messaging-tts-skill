@@ -12,8 +12,11 @@
 
 set -eo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# ====== Load .env (if exists) ======
+source "$PROJECT_DIR/scripts/load_env.sh"
 
 # ====== Config ======
 API_BASE="${MIMO_API_BASE:-https://token-plan-cn.xiaomimimo.com/v1}"
@@ -22,10 +25,12 @@ REQUEST_TIMEOUT=60
 
 # ====== API Key Resolution ======
 resolve_api_key() {
+    # 优先级 1: 环境变量（含 .env 加载后的）
     if [[ -n "${MIMO_API_KEY:-}" ]]; then
         echo "$MIMO_API_KEY"
         return
     fi
+    # 优先级 2: Hermes config.yaml（Hermes Agent 环境）
     local config_file="${HERMES_HOME:-$HOME/.hermes}/config.yaml"
     if [[ -f "$config_file" ]]; then
         local key
@@ -59,7 +64,9 @@ main() {
     local api_key
     api_key="$(resolve_api_key)"
     if [[ -z "$api_key" ]]; then
-        echo "[mimo-tts] ERROR: MIMO_API_KEY not set and not found in config.yaml" >&2
+        echo "[mimo-tts] ERROR: MIMO_API_KEY not set" >&2
+        echo "[mimo-tts]   Set via: export MIMO_API_KEY=..., or create .env in project root" >&2
+        echo "[mimo-tts]   See .env.example for reference" >&2
         exit 1
     fi
 

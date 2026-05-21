@@ -4,7 +4,7 @@
 # 输入: $1 = text, $2 = voice_name, $3 = output_wav_path
 # 输出: WAV 文件到 $3
 #
-# 依赖: MIMO_API_KEY 环境变量
+# 依赖: MIMO_API_KEY 环境变量（或项目根目录下的 .env 文件）
 # 参考音频: 通过 voice_name 在配置中查找对应的参考音频路径
 #
 # 使用说明:
@@ -13,8 +13,11 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# ====== Load .env (if exists) ======
+source "$PROJECT_DIR/scripts/load_env.sh"
 
 # ====== Config ======
 API_BASE="${MIMO_API_BASE:-https://token-plan-cn.xiaomimimo.com/v1}"
@@ -39,6 +42,8 @@ main() {
     # 检查 API Key
     if [[ -z "${MIMO_API_KEY:-}" ]]; then
         echo "[mimo-voiceclone] ERROR: MIMO_API_KEY not set" >&2
+        echo "[mimo-voiceclone]   Set via: export MIMO_API_KEY=..., or create .env in project root" >&2
+        echo "[mimo-voiceclone]   See .env.example for reference" >&2
         exit 1
     fi
 

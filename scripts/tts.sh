@@ -17,8 +17,11 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd)"
 PROVIDER_DIR="$SCRIPT_DIR/providers"
+
+# ====== Load .env (if exists) ======
+source "$SCRIPT_DIR/load_env.sh"
 
 # ====== Default Config ======
 DEFAULT_VOICE="${DEFAULT_VOICE:-茉莉}"
@@ -35,6 +38,7 @@ show_help() {
 
 环境变量:
   MIMO_API_KEY   — MiMo API Key (MiMo TTS / VoiceClone 必需)
+                    也可在项目根目录创建 .env 文件（参见 .env.example）
   MIMO_API_BASE  — MiMo API Base URL (可选，有默认值)
   TEMP_DIR       — 临时目录 (可选，默认 /tmp/hermes-voice)
   DEFAULT_VOICE  — 默认声线 (可选，默认 茉莉)

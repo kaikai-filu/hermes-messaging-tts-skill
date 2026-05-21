@@ -1,19 +1,30 @@
-# macOS
-.DS_Store
-*.swp
-*.swo
+# ═══════════════════════════════════════════
+# hermes-messaging-tts-skill — .gitignore
+# ═══════════════════════════════════════════
 
-# Audio output (temp files)
+# 环境变量配置（含 API Key 等敏感信息，永不提交）
+.env
+
+# 参考音频文件（用户个人声音样本）
+references/voiceref-*.wav
+references/voiceref-*.mp3
+references/voiceref-*.ogg
+
+# 音频输出缓存
 *.wav
 *.mp3
 *.ogg
 *.opus
 *.silk
 
+# macOS 系统文件
+.DS_Store
+*.swp
+*.swo
+
 # IDE
 .idea/
 .vscode/
-*.sublime-*
 
-# Shell
-*.log
+# 临时文件
+/tmp/hermes-voice/

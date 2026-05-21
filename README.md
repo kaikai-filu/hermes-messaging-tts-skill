@@ -44,15 +44,21 @@ cp -r hermes-messaging-tts-skill ~/.hermes/skills/media/
 
 ### MiMo API Key
 
-使用预设声线（茉莉/冰糖）或声音克隆需要 MiMo API Key。配置方式（二选一）：
+使用预设声线（茉莉/冰糖）或声音克隆需要 MiMo API Key。配置方式（三选一，按优先级排序）：
+
+| 方式 | 说明 | 适用场景 |
+|:---|:---|:---|
+| 环境变量 | `export MIMO_API_KEY="tp-xxxxx..."` | 临时/CI 环境 |
+| `.env` 文件 | `cp .env.example .env` 后填入 Key | **推荐** — OpenClaw / 直接命令行 |
+| `config.yaml` | Hermes Agent 的 provider 配置 | Hermes Agent 自动加载 |
 
 ```bash
-# 方式 1: 环境变量
-export MIMO_API_KEY="tp-xxxxx..."
-
-# 方式 2: config.yaml（推荐）
-# 在 ~/.hermes/config.yaml 中配置 provider
+# 快速配置（推荐）
+cp .env.example .env
+# 然后编辑 .env 填入你的 MIMO_API_KEY
 ```
+
+> `.env` 已在 `.gitignore` 中，不会误提交到 GitHub。
 
 ## 🎙️ 可用声线
 
