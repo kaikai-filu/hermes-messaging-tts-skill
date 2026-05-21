@@ -1,5 +1,5 @@
 ---
-name: messaging-tts-skill
+name: hermes-messaging-tts-skill
 description: "Multi-platform TTS voice messaging skill. Use when generating TTS voice messages for Telegram/Feishu/WeChat delivery. Supports Edge TTS (Microsoft), MiMo TTS (preset voices), and MiMo VoiceClone (reference audio cloning). Triggers on: 每次回复配语音 | 用XX的声音说 | 语音气泡 | 克隆声音 | voice message."
 version: 1.1.0
 author: Hermes Agent

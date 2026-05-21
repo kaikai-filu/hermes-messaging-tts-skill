@@ -1,4 +1,4 @@
-# messaging-tts-skill 🎤
+# hermes-messaging-tts-skill 🎤
 
 > Hermes Agent skill — 自动为文字回复生成多平台语音气泡
 
@@ -17,7 +17,7 @@
 ### 通过 Hermes CLI（推荐）
 
 ```bash
-hermes skills install https://raw.githubusercontent.com/kaikai-filu/messaging-tts-skill/main/SKILL.md --force
+hermes skills install https://raw.githubusercontent.com/kaikai-filu/hermes-messaging-tts-skill/main/SKILL.md --force
 ```
 
 > `--force` 是必要的，因为安全扫描器会将「可执行脚本 + 网络请求」标记为 DANGEROUS。实际代码安全可审计，详见[安全说明](#-安全说明)。
@@ -26,9 +26,9 @@ hermes skills install https://raw.githubusercontent.com/kaikai-filu/messaging-tt
 
 ```bash
 # 克隆仓库
-git clone https://github.com/kaikai-filu/messaging-tts-skill.git
-# 复制到 skills 目录
-cp -r messaging-tts-skill ~/.hermes/skills/media/
+git clone https://github.com/kaikai-filu/hermes-messaging-tts-skill.git
+
+cp -r hermes-messaging-tts-skill ~/.hermes/skills/media/
 # 重载技能
 /reload-skills
 ```
@@ -140,7 +140,7 @@ bash scripts/to_silk.sh /tmp/output.wav /tmp/output.silk
 | exfiltration | 文档中提及检查 API Key 环境变量（实际是故障排查说明，非数据外传） |
 | persistence | 文档中提及 `config.yaml`（实际是说明 API Key 读取路径，不会修改配置文件） |
 
-所有脚本代码均在 [GitHub](https://github.com/kaikai-filu/messaging-tts-skill) 公开，可自由审计：
+所有脚本代码均在 [GitHub](https://github.com/kaikai-filu/hermes-messaging-tts-skill) 公开，可自由审计：
 - ✅ 不收集任何个人信息
 - ✅ 不修改配置文件
 - ✅ API Key 只在本地读取，仅发送到 MiMo/Edge 官方 API 端点
@@ -149,7 +149,7 @@ bash scripts/to_silk.sh /tmp/output.wav /tmp/output.silk
 ## 📁 项目结构
 
 ```
-messaging-tts-skill/
+hermes-messaging-tts-skill/
 ├── SKILL.md                        # Hermes skill 主文档
 ├── README.md                       # 本文件
 ├── scripts/

@@ -2,7 +2,7 @@
 #
 # 在 Hermes Agent 中嵌入语音回复的模板。
 # Agent 回复的最后附上 [[audio_as_voice]] 和 [[text_to_speech]] 语法。
-# 参考现有 messaging-tts-skill 的 "Execution" 部分。
+# 参考现有 hermes-messaging-tts-skill 的 "Execution" 部分。
 #
 # ─── 用法 ───
 # 1. 在 SKILL.md 的 execution 部分包含以下模板
@@ -34,7 +34,7 @@
 #
 # ```bash
 # # 文字 → WAV → OGG → Telegram 语音气泡
-# SKILL_DIR="/Users/yzy/workAround/hermes-area/messaging-tts-skill"
+# SKILL_DIR="/Users/yzy/workAround/hermes-area/hermes-messaging-tts-skill"
 # TEXT="要朗读的内容"
 # VOICE="茉莉"    # 可选: 茉莉, 冰糖, 克隆, xiaoxiao...
 #
