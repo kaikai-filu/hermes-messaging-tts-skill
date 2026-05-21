@@ -58,8 +58,8 @@ export MIMO_API_KEY="tp-xxxxx..."
 
 | 声线名 | 引擎 | 说明 |
 |:---|:---|:---|
-| `茉莉` (默认) | MiMo TTS | 预设女声，速度快 |
-| `冰糖` | MiMo TTS | 另一种预设女声 |
+| `白桦` (默认) | MiMo TTS | 知性女声 |
+| `茉莉` | MiMo TTS | 温柔女声 |
 | `克隆` | MiMo VoiceClone | 需要参考音频 |
 | `xiaoxiao` | Edge TTS | 微软晓晓（中文女声） |
 | `yunxi` | Edge TTS | 微软云希（中文男声） |
@@ -107,7 +107,7 @@ bash scripts/tts.sh "你好，这是我的克隆声音" "克隆" /tmp/output.wav
 ### 命令行直接使用
 
 ```bash
-# 基本使用（默认茉莉声线）
+# 基本使用（默认白桦声线）
 bash scripts/tts.sh "你好世界" "" /tmp/output.wav
 
 # 指定声线
