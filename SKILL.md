@@ -65,7 +65,7 @@ TTS   (预设声线)    (克隆声线)
 
 | 声线名 | Provider | 参数 | 用途 |
 |--------|----------|------|------|
-| `白桦` | MiMo TTS | voice=白桦 | 知性女声（当前首选） |
+| `白桦` | MiMo TTS | voice=白桦 | 稳重男声（当前首选） |
 | `茉莉` | MiMo TTS | voice=茉莉 | 默认女声 |
 | `冰糖` | MiMo TTS | voice=冰糖 | 甜美女声 |
 | `苏打` | MiMo TTS | voice=苏打 | 活泼女声 |
@@ -80,7 +80,7 @@ TTS   (预设声线)    (克隆声线)
 | `克隆` | MiMo VoiceClone | ref=references/my-voice.wav | 克隆声线 |
 | `克隆-备用` | MiMo VoiceClone | ref=references/备用.wav | 备用克隆声线 |
 
-**当前默认声线**：`白桦`（知性女声）
+**当前默认声线**：`白桦`（稳重男声）
 
 **切换声线方法**：
 - 用户说「用冰糖的声音」→ 将当前 voice 变量切为 `冰糖`
@@ -168,7 +168,7 @@ edge-tts --voice zh-CN-XiaoxiaoNeural --text "你好" --write-media /tmp/edge.wa
 
 **特点**：需 API Key（自动从 config.yaml 或 `MIMO_API_KEY` 环境变量读取），中文质量优于 Edge，有声线选择。
 
-**默认声线**：白桦（知性女声）
+**默认声线**：白桦（稳重男声）
 
 **脚本路径**：`scripts/providers/mimo-tts.sh` — 自动调用，无需手动传 Key。
 

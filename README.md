@@ -58,7 +58,7 @@ export MIMO_API_KEY="tp-xxxxx..."
 
 | 声线名 | 引擎 | 说明 |
 |:---|:---|:---|
-| `白桦` (默认) | MiMo TTS | 知性女声 |
+| `白桦` (默认) | MiMo TTS | 稳重男声 |
 | `茉莉` | MiMo TTS | 温柔女声 |
 | `克隆` | MiMo VoiceClone | 需要参考音频 |
 | `xiaoxiao` | Edge TTS | 微软晓晓（中文女声） |
