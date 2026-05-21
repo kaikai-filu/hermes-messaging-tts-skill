@@ -26,6 +26,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd)"
 PROVIDER_DIR="$SCRIPT_DIR/providers"
 
 # ====== Load .env (if exists) ======
+# ⚠️ 必须放在最前面（所有 Provider 调用之前）！
+# tts.sh 的 check_mimo_key_available() 通过环境变量检测 Key 是否存在。
+# Provider 脚本 (mimo-tts.sh / mimo-voiceclone.sh) 也通过环境变量获取 Key。
+# 如果 .env 加载不一致，会导致：
+#   ❌ tts.sh 认为没 Key → 降级 Edge TTS
+#   → 但 Provider 发现 Key 可用 → 矛盾
+# 所以必须在路由前统一加载 .env，保持路由层与 Provider 层一致。
 source "$SCRIPT_DIR/load_env.sh"
 
 # ====== Default Config ======

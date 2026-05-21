@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 #
 # load_env.sh — 加载项目根目录的 .env 文件
-# 在所有脚本中 source 此文件即可自动加载
+# 被 tts.sh（路由层）和各 Provider 脚本共同 source。
+# 路由层的 Key 检测 (check_mimo_key_available) 依赖此文件加载 .env，
+# 否则会因检测不到 Key 而误降级到 Edge TTS。
 #
 # 用法:
-#   source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/load_env.sh"
+#   source "$(cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd)/load_env.sh"
 #
 # 搜索路径:
 #   1. 本脚本所在目录的父目录（即项目根目录）下的 .env

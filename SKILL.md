@@ -25,12 +25,21 @@ metadata:
 ┌──────────────────────────────┐
 │   tts.sh (路由分发层)         │
 │   根据声线名 → 选 Provider    │
+│   ┌─────────────────────┐    │
+│   │ load_env.sh 先加载   │    │  ← ⚠️ 必须：路由层和 Provider 层
+│   │ .env 统一环境变量    │    │     共享同一个 Key 视图，避免误降级
+│   └─────────────────────┘    │
+│   ┌─────────────────────┐    │
+│   │ check_mimo_key()     │    │  ← 检测 Key → 不存在/401？降级！
+│   └─────────────────────┘    │
 └──────┬───────────────────────┘
        │
   ┌────┼────────────┐
   ▼    ▼            ▼
 Edge  MiMo TTS     MiMo VoiceClone
 TTS   (预设声线)    (克隆声线)
+(免费,  (需 Key,       (需 Key + 参考音频)
+ 无 Key)  白桦/茉莉...)  
   │    │            │
   └────┴────────────┘
        │  WAV
@@ -166,16 +175,22 @@ edge-tts --voice zh-CN-XiaoxiaoNeural --text "你好" --write-media /tmp/edge.wa
 
 ### MiMo TTS (预设声线)
 
-**特点**：需 API Key（自动从 config.yaml 或 `MIMO_API_KEY` 环境变量读取），中文质量优于 Edge，有声线选择。
+**特点**：需 API Key（从环境变量/`.env`/Hermes config.yaml 逐级读取），中文质量优于 Edge，有声线选择。
+通过 `load_env.sh` 统一加载，使 tts.sh 路由层的 Key 检测（`check_mimo_key_available`）与 Provider 脚本读取的 Key 保持一致。
 
 **默认声线**：白桦（稳重男声）
 
 **脚本路径**：`scripts/providers/mimo-tts.sh` — 自动调用，无需手动传 Key。
 
 **API Key 来源**（按优先级）：
-1. 环境变量 `MIMO_API_KEY`
+1. 环境变量 `MIMO_API_KEY`（可在 `.env` 文件中设置，由 `load_env.sh` 加载）
 2. 用户本地 config 中 `mimo-token-plan` provider 的 `api_key`
-3. 均未设置则报错退出
+3. 均未设置 → tts.sh 路由层检测到无 Key，自动降级至 Edge TTS（yunxi 男声），不会报错退出
+
+> **注意**：tts.sh 路由层与 Provider 脚本共用 `load_env.sh` 加载 `.env` 文件。
+> 如果路由层加载了 `.env` 但 Provider 没加载（或者反过来），会导致 Key 检测状态不一致，
+> 出现「路由认为没 Key 而降级，但实际 Key 存在」的矛盾。
+> 这就是为什么 `load_env.sh` 必须在所有 Provider 调用之前加载，且被双方共同 source。
 
 **底层 API 参考（`scripts/providers/mimo-tts.sh` 内部使用）**：
 
@@ -273,7 +288,7 @@ jq -n --arg voice "$VOICE_URL" '{
 
 3. **MP3 文件附件代替了语音气泡**：Telegram 上 MP3 会被当作文件。必须用 OGG/Opus + `[[audio_as_voice]]` 标签。
 
-4. **MiMo API 403/401**：确认 API Key 已正确配置（见上方「API Key 来源」），Key 无效或过期会导致 401。
+4. **MiMo API 403/401**：**自动降级** — MiMo Key 失效后 tts.sh 会自动切换至 Edge TTS (yunxi 男声) 并在语音中提示。无需手动干预。若要排查 Key 本身，见上方「API Key 来源」检查配置。
 
 5. **VoiceClone 返回空语音**：参考音频格式不对。必须是 WAV mono 24kHz，`data:audio/wav;base64,...` 开头。
 
@@ -286,22 +301,51 @@ jq -n --arg voice "$VOICE_URL" '{
 ## Provider Selection Logic (脚本 tts.sh)
 
 ```bash
-# 伪代码
+# 真实逻辑（scripts/tts.sh）
+# 调用前已通过 load_env.sh 加载 .env，路由层与 Provider 层共享同一 Key 视图
 function tts_main() {
     local text="$1"
     local voice_name="$2"  # 如 "茉莉" / "克隆" / "xiaoxiao"
     local output="$3"
 
+    # Step 1: check_mimo_key_available 检测 Key 存在性
+    #   - 环境变量 → .env → Hermes config.yaml
+    #   - 找到 → MIMO_KEY_EXISTS=true
+    #   - 未找到 → MIMO_KEY_EXISTS=false
+
     case "$voice_name" in
         茉莉|冰糖|苏打|白桦|Mia|Chloe|Milo|Dean|mimo_default)
-            scripts/providers/mimo-tts.sh "$text" "$voice_name" "$output" ;;
+            if [[ "$MIMO_KEY_EXISTS" != "true" ]]; then
+                # 无 Key → 直接降级 Edge TTS
+                mimo_fallback_to_edge "$text" "$output"
+            else
+                # 有 Key → 调 MiMo TTS
+                set +e  # 临时关闭 set -e，捕获 exit code
+                scripts/providers/mimo-tts.sh "$text" "$voice_name" "$output"
+                mimo_exit=$?
+                set -e
+                if [[ $mimo_exit -eq 2 ]]; then
+                    # 401/403 → Key 失效 → 降级
+                    mimo_fallback_to_edge "$text" "$output"
+                fi
+            fi ;;
         克隆|克隆-备用)
-            scripts/providers/mimo-voiceclone.sh "$text" "$voice_name" "$output" ;;
+            # 同上逻辑，只是调 mimo-voiceclone.sh ;;
         xiaoxiao|yunxi|yunyang)
             scripts/providers/edge.sh "$text" "$voice_name" "$output" ;;
         *)
-            # 未知声线，回退默认
-            scripts/providers/mimo-tts.sh "$text" "茉莉" "$output" ;;
+            # 未知声线 → 同白桦分支（调 MiMo，有降级）
+            if [[ "$MIMO_KEY_EXISTS" != "true" ]]; then
+                mimo_fallback_to_edge "$text" "$output"
+            else
+                set +e
+                scripts/providers/mimo-tts.sh "$text" "茉莉" "$output"
+                mimo_exit=$?
+                set -e
+                if [[ $mimo_exit -eq 2 ]]; then
+                    mimo_fallback_to_edge "$text" "$output"
+                fi
+            fi ;;
     esac
 }
 ```
