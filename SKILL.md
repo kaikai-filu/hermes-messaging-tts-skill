@@ -172,10 +172,10 @@ edge-tts --voice zh-CN-XiaoxiaoNeural --text "你好" --write-media /tmp/edge.wa
 
 **脚本路径**：`scripts/providers/mimo-tts.sh` — 自动调用，无需手动传 Key。
 
-**API Key 解析优先级**：
-1. `$MIMO_API_KEY` 环境变量
-2. `~/.hermes/config.yaml` 中 `mimo-token-plan` provider 的 `api_key` 字段
-3. 两者均无则报错退出
+**API Key 来源**（按优先级）：
+1. 环境变量 `MIMO_API_KEY`
+2. 用户本地 config 中 `mimo-token-plan` provider 的 `api_key`
+3. 均未设置则报错退出
 
 **底层 API 参考（`scripts/providers/mimo-tts.sh` 内部使用）**：
 
@@ -273,7 +273,7 @@ jq -n --arg voice "$VOICE_URL" '{
 
 3. **MP3 文件附件代替了语音气泡**：Telegram 上 MP3 会被当作文件。必须用 OGG/Opus + `[[audio_as_voice]]` 标签。
 
-4. **MiMo API 403/401**：检查 `MIMO_API_KEY` 是否在环境变量中，或 `~/.hermes/.env` 中。
+4. **MiMo API 403/401**：确认 API Key 已正确配置（见上方「API Key 来源」），Key 无效或过期会导致 401。
 
 5. **VoiceClone 返回空语音**：参考音频格式不对。必须是 WAV mono 24kHz，`data:audio/wav;base64,...` 开头。
 
